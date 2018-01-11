@@ -99,11 +99,11 @@ gives output like:
 
 |type|name|parameters|return|
 | --- | --- | --- | --- |
-|udf|zk_read|_FUNC_(zkAddress, timeout, pathToReads...) recursively read data from zookeeper paths|struct of "p", "v", path and value|
-|udf|zk_write|_FUNC_(zkAddress, timeout, pathAndValues...) recursively write values paired with zookeeper paths|struct of "p", "v", path and old value|
-|udf|zk_delete|_FUNC_(zkAddress, timeout, pathToDeletes) recursively delete zookeeper paths|struct of "p", "v", path and old value|
-|udtf|t_zk_write|_FUNC_(zkAddress, timeout, pathAndValues...) recursively write values paired with zookeeper paths|struct of "p", "v", path and old value|
-|udtf|t_zk_delete|_FUNC_(zkAddress, timeout, pathToDeletes) recursively delete zookeeper paths|struct of "p", "v", path and old value|
+|udf|zk_read|zk_read(String zkAddress, int timeout, String...pathToReads...) recursively read data from zookeeper paths|struct of "p", "v", path and value|
+|udf|zk_write|zk_write(String zkAddress, int timeout, Map pathAndValues) recursively write values paired with zookeeper paths|struct of "p", "v", path and old value|
+|udf|zk_delete|zk_delete(String zkAddress, int timeout, String...pathToDeletes) recursively delete zookeeper paths|struct of "p", "v", path and old value|
+|udtf|t_zk_write|t_zk_write(String zkAddress, int timeout, String...pathAndValues) recursively write values paired with zookeeper paths|struct of "p", "v", path and old value|
+|udtf|t_zk_delete|t_zk_delete(Any context, String zkAddress, int timeout, Map<String, String> pathAndValues) recursively write values paired with zookeeper paths|struct of "p", "v", path and old value|
 
 ### Kafka (/default producer configurations/default consumer configuration/list topics/pull/push)
 |type|name|parameters|return|
