@@ -27,6 +27,8 @@ change of code will trigger scala interpreter to compile and update the ongoing 
 
 Basically a timer to run spark jobs without compiling, stop, restart spark process.
 
+To do, will add support for java/python/sql source file
+
 
 ## 2. Hive functions
 
