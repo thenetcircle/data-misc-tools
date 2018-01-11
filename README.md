@@ -112,7 +112,7 @@ gives output like:
 |udf|kf_consumer_cfgs|kf_consumer_cfgs() - return the map containing default settings for kafka consumer|a map|
 |udf|kf_producer_cfgs|kf_producer_cfgs() - return the map containing default settings for kafka producer|a map|
 |udf|kf_topics|kf_topics() - read all topics from kafka by settings in map parameter (kf_consumer_cfgs)|an array of structs with properties of t(topic) and p(partition)|
-|udf|kf_pull|_FUNC_(map, start_date_str, end_date_str, topics...) - poll records from kafka by time windows and topics, it returns an array of structs with properties of t(topic), ct(creation time), k(key) and v(value)|an array of structs that has "t" for topic, "ct" for creation time, "k" for key, "v" for value|
+|udf|kf_pull|kf_pull(map, start_date_str, end_date_str, topics...) - poll records from kafka by time windows and topics, it returns an array of structs with properties of t(topic), ct(creation time), k(key) and v(value)|an array of structs that has "t" for topic, "ct" for creation time, "k" for key, "v" for value|
 |udtf|t_kf_push|t_kf_push(Any context, Map<String, String> map, String topic, String key, String value) - pushWithTransaction records to kafka topics, it returns an array records of structs with properties of t(topic), ct(creation time), k(key) and v(value)|an array of structs that has "t" for topic, "ct" for creation time, "k" for key, "v" for value|
 
 
