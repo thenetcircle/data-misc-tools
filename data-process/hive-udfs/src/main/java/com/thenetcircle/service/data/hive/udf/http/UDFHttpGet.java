@@ -26,7 +26,7 @@ import static org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveO
 import static org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorUtils.PrimitiveGrouping.STRING_GROUP;
 
 @Description(name = "http_get",
-        value = "_FUNC_(url, timeout, headers) - send get request to url with headers in timeout")
+        value = "_FUNC_(String url, int timeout, Map<String, String> headers) - send get request to url with headers in timeout")
 @UDFType(deterministic = false, stateful = false, distinctLike = true)
 public class UDFHttpGet extends GenericUDF {
 

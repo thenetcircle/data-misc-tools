@@ -2,6 +2,8 @@ package com.thenetcircle.service.data.hive.udf;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.hive.common.type.HiveDecimal;
@@ -373,9 +375,14 @@ public class UDFHelper {
 
                 ObjectInspector argObjInsp = argOIs[i];
                 if (param.isVarArgs()) {
-                    for (int i1 = i; i1 < j; i1 ++) {
-                        checkPrimitiveParamAndArgOI(paramType, argObjInsp, i1);
+                    for (int i1 = i; i1 < j; i1++) {
+                        checkPrimitiveParamAndArgOI(paramType.getComponentType(), argObjInsp, i1);
                     }
+                    mb.objInspAndConverters.add(new ImmutablePair(argObjInsp,
+                        getConverter(argObjInsp,
+                            getPrimitiveJavaObjectInspector(getTypeEntryFromPrimitiveJava(paramType.getComponentType()).primitiveCategory)
+                        )
+                    ));
                     break;
                 }
 
@@ -415,9 +422,9 @@ public class UDFHelper {
                     //TODO list/set/map?
 
                 }
-
-
             }
+
+            System.out.println("mb = " + ToStringBuilder.reflectionToString(mb, ToStringStyle.MULTI_LINE_STYLE));
 
             return mb;
         } catch (Exception e) {
@@ -442,7 +449,6 @@ public class UDFHelper {
     public static ObjectInspector retType2ObjInsp(Method md) {
         Class clz = md.getReturnType();
         if (clz == null || Void.class.equals(clz)) return PrimitiveObjectInspectorFactory.javaVoidObjectInspector;
-
 
         PrimitiveTypeEntry typeEntry = getTypeEntryFromPrimitiveJava(clz);
         if (typeEntry != null)

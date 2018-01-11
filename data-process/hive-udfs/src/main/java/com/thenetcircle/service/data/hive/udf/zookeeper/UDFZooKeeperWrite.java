@@ -29,7 +29,7 @@ import static org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveO
 
 @Description(
     name = "zk_write",
-    value = "_FUNC_(zkAddress, timeout, pathAndValues...) recursively write values paired with zookeeper paths")
+    value = "_FUNC_(String zkAddress, int timeout, Map pathAndValues) recursively write values paired with zookeeper paths")
 @UDFType(deterministic = false, stateful = false, distinctLike = true, impliesOrder = true)
 public class UDFZooKeeperWrite extends GenericUDF {
     private transient StringObjectInspector zkAddrInsp;

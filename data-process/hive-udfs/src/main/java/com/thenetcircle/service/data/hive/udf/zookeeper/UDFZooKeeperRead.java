@@ -26,7 +26,7 @@ import static org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveO
 
 @Description(
     name = "zk_read",
-    value = "_FUNC_(zkAddress, timeout, pathToReads...) recursively read data from zookeeper paths")
+    value = "_FUNC_(String zkAddress, int timeout, String...pathToReads...) recursively read data from zookeeper paths")
 @UDFType(deterministic = false, stateful = false, distinctLike = true)
 public class UDFZooKeeperRead extends GenericUDF {
     private transient StringObjectInspector zkAddrInsp;

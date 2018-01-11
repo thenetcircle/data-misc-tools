@@ -2,6 +2,7 @@ package com.thenetcircle.service.data.hive.udf.commons;
 
 import com.thenetcircle.service.data.hive.udf.UDFHelper;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.hadoop.hive.ql.exec.UDFArgumentException;
 import org.apache.hadoop.hive.ql.metadata.HiveException;
 import org.apache.hadoop.hive.ql.udf.generic.GenericUDTF;
@@ -14,7 +15,7 @@ public abstract class UDTFExt extends GenericUDTF {
     protected String funcName = null;
 
     public StructObjectInspector initialize(ObjectInspector[] argOIs)
-            throws UDFArgumentException {
+        throws UDFArgumentException {
 
         checkArgsSize(funcName, argOIs, 1, 100);
 
@@ -31,6 +32,7 @@ public abstract class UDTFExt extends GenericUDTF {
 
     @Override
     public void process(Object[] args) throws HiveException {
-        forward(ArrayUtils.add(evaluate(args, 1), args[0]));
+        Object[] results = ArrayUtils.add(evaluate(args, 1), args[0]);
+        forward(results);
     }
 }

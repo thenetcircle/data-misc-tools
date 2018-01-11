@@ -28,7 +28,7 @@ import static org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveO
 
 @Description(
     name = "zk_delete",
-    value = "_FUNC_(zkAddress, timeout, pathToDeletes) recursively delete zookeeper paths")
+    value = "_FUNC_(String zkAddress, int timeout, String...pathToDeletes) recursively delete zookeeper paths")
 @UDFType(deterministic = false, stateful = false, distinctLike = true, impliesOrder = true)
 public class UDFZooKeeperDelete extends GenericUDF {
     private transient StringObjectInspector zkAddrInsp;

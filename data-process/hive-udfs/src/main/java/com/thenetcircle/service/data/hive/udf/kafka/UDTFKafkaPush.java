@@ -27,7 +27,7 @@ import static org.apache.kafka.clients.producer.ProducerConfig.REQUEST_TIMEOUT_M
 
 
 @Description(name = "t_kf_push",
-    value = "_FUNC_(map, topic, key, value) - pushWithTransaction records to kafka topics, it returns an array records of structs with properties of k(key) and v(value)")
+    value = "t_kf_push(Any context, Map<String, String> map, String topic, String key, String value) - pushWithTransaction records to kafka topics, it returns an array records of structs with properties of t(topic), ct(creation time), k(key) and v(value)")
 public class UDTFKafkaPush extends UDTFExt {
     private static transient final Logger log = LoggerFactory.getLogger(UDTFKafkaPush.class);
     public static final String FUNC_NAME = "t_kf_push";

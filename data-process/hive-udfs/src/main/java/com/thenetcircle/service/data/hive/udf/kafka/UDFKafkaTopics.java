@@ -27,7 +27,7 @@ import static java.lang.String.format;
 
 
 @Description(name = "kf_topics",
-    value = "_FUNC_(map) - read all topics from kafka by settings in map parameter")
+    value = "_FUNC_(map) - read all topics from kafka by settings in map parameter, returns an array of structs with properties of t(topic) and p(partition)")
 @UDFType(deterministic = false, stateful = false, distinctLike = true)
 public class UDFKafkaTopics extends GenericUDF {
 

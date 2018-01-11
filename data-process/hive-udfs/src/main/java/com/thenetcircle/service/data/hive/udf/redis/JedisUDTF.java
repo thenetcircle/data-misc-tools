@@ -4,6 +4,7 @@ import com.thenetcircle.service.data.hive.udf.UDFHelper;
 import com.thenetcircle.service.data.hive.udf.commons.UDTFExt;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.hadoop.hive.ql.exec.UDFArgumentException;
 import org.apache.hadoop.hive.ql.exec.UDFArgumentTypeException;
 import org.apache.hadoop.hive.ql.metadata.HiveException;
@@ -71,7 +72,9 @@ public abstract class JedisUDTF extends UDTFExt {
     public void process(Object[] args) throws HiveException {
         setupJedis();
 
-        super.process(args);
+        Object[] results = ArrayUtils.add(evaluate(args, 2), args[0]);
+        System.out.printf("args: %s\nresult: %s\n\n", ToStringBuilder.reflectionToString(args), ToStringBuilder.reflectionToString(results));
+        forward(results);
     }
 
     private void setupJedis() throws HiveException {

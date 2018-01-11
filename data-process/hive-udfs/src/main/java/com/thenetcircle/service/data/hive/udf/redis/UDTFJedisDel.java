@@ -7,18 +7,18 @@ import org.apache.hadoop.hive.ql.exec.UDFArgumentException;
 import org.apache.hadoop.hive.ql.metadata.HiveException;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspectorConverters;
-import redis.clients.jedis.JedisCommands;
+import redis.clients.jedis.Jedis;
 
 import java.lang.reflect.Method;
 import java.util.stream.Stream;
 
-@Description(name = "jd_del", value = "del(String...keys) -> String")
+@Description(name = "jd_del", value = "jd_del(Any context, String redisURI, String...keys) -> String")
 public class UDTFJedisDel extends JedisUDTF {
 
     @Override
     protected UDFHelper.PrimitiveMethodBridge initMethodBridge(ObjectInspector[] argOIs) throws UDFArgumentException {
         Method delMd = JedisHelper.getMethod("del", String.class);
-        UDFHelper.PrimitiveMethodBridge mb = UDFHelper.getMethodBridge(JedisCommands.class, delMd, argOIs);
+        UDFHelper.PrimitiveMethodBridge mb = UDFHelper.getMethodBridge(Jedis.class, delMd, argOIs);
         return mb;
     }
 

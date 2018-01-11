@@ -5,7 +5,7 @@ import org.apache.hadoop.hive.ql.exec.Description;
 import org.apache.hadoop.hive.ql.exec.UDFArgumentException;
 import org.apache.hadoop.hive.ql.metadata.HiveException;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
-import redis.clients.jedis.JedisCommands;
+import redis.clients.jedis.Jedis;
 
 import java.lang.reflect.Method;
 
@@ -14,16 +14,8 @@ public class UDTFJedisSet2 extends JedisUDTF {
 
     @Override
     protected UDFHelper.PrimitiveMethodBridge initMethodBridge(ObjectInspector[] argOIs) throws UDFArgumentException {
-        Method setMd = null;
-        try {
-            setMd = JedisCommands.class.getDeclaredMethod("set", String.class, String.class);
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-            throw new UDFArgumentException(e);
-        }
-
-        UDFHelper.PrimitiveMethodBridge mb = UDFHelper.getMethodBridge(JedisCommands.class, setMd, argOIs);
-
+        Method setMd = JedisHelper.getMethod("set", String[].class);
+        UDFHelper.PrimitiveMethodBridge mb = UDFHelper.getMethodBridge(Jedis.class, setMd, argOIs);
         return mb;
     }
 

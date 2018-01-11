@@ -29,7 +29,7 @@ import static org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveO
 
 @Description(
     name = "t_zk_delete",
-    value = "_FUNC_(zkAddress, timeout, pathToDeletes) recursively delete zookeeper paths")
+    value = "_FUNC_(Any context, String zkAddress, int timeout, String...pathToDeletes) recursively delete zookeeper paths")
 public class UDTFZooKeeperDelete extends UDTFExt {
     public static final String FUNC_NAME = "t_zk_delete";
     private transient StringObjectInspector zkAddrInsp;

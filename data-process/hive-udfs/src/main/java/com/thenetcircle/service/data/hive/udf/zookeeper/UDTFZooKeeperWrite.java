@@ -31,7 +31,7 @@ import static org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveO
 
 @Description(
     name = "t_zk_write",
-    value = "_FUNC_(zkAddress, timeout, pathAndValues) recursively write values paired with zookeeper paths")
+    value = "_FUNC_(Any context, String zkAddress, int timeout, Map<String, String> pathAndValues) recursively write values paired with zookeeper paths")
 public class UDTFZooKeeperWrite extends UDTFExt {
     private static transient final Logger log = LoggerFactory.getLogger(UDTFZooKeeperWrite.class);
 

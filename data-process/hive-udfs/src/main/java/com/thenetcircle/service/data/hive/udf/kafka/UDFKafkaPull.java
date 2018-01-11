@@ -27,7 +27,7 @@ import static org.apache.kafka.clients.CommonClientConfigs.BOOTSTRAP_SERVERS_CON
 
 
 @Description(name = "kf_pull",
-    value = "_FUNC_(map, start_date_str, end_date_str, topics...) - poll records from kafka by time windows and topics, it returns an array of structs with properties of k(key) and v(value)")
+    value = "_FUNC_(map, start_date_str, end_date_str, topics...) - poll records from kafka by time windows and topics, it returns an array of structs with properties of t(topic), ct(creation time), k(key) and v(value)")
 @UDFType(deterministic = false, stateful = false, distinctLike = true)
 public class UDFKafkaPull extends GenericUDF {
 
