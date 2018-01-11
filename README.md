@@ -27,6 +27,8 @@ change of code will trigger scala interpreter to compile and update the ongoing 
 
 Basically a timer to run spark jobs without compiling, stop, restart spark process.
 
+To do, will add support for java/python/sql source file
+
 
 ## 2. Hive functions
 
@@ -77,19 +79,17 @@ result is like:
 
 |                        _c0                         |
 | -------------------------------------------------- |
-| {"code":200,
-"headers":{"Transfer-Encoding":"chunked","Status":"200 OK","Server":"GitHub.com","Access-Control-Allow-Origin":"*","X-Content-Type-Options":"nosniff","X-RateLimit-Reset":"1515651158","Last-Modified":"Wed, 13 Dec 2017 04:09:41 GMT","Date":"Thu, 11 Jan 2018 06:03:49 GMT","X-Runtime-rack":"0.027911","X-Frame-Options":"deny","Access-Control-Expose-Headers":"ETag, Link, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval","Strict-Transport-Security":"max-age=31536000; includeSubdomains; preload","X-RateLimit-Remaining":"52","Cache-Control":"public, max-age=60, s-maxage=60","ETag":"W/\"6d227b45e362cfa7a1758e504bf534a0\"","X-GitHub-Media-Type":"github.v3; format=json","Content-Security-Policy":"default-src 'none'","Vary":"Accept-Encoding","X-RateLimit-Limit":"60","X-XSS-Protection":"1; mode=block","Content-Type":"application/json; charset=utf-8","X-GitHub-Request-Id":"90F0:A965:3DC6B5:4DC3CD:5A56FE45"},
-
-"content":"{\"login\":\"apache\",\"id\":47359,\"url\":\"https://api.github.com/orgs/apache\",\"repos_url\":\"https://api.github.com/orgs/apache/repos\",\"events_url\":\"https://api.github.com/orgs/apache/events\",\"hooks_url\":\"https://api.github.com/orgs/apache/hooks\",\"issues_url\":\"https://api.github.com/orgs/apache/issues\",\"members_url\":\"https://api.github.com/orgs/apache/members{/member}\",\"public_members_url\":\"https://api.github.com/orgs/apache/public_members{/member}\",\"avatar_url\":\"https://avatars0.githubusercontent.com/u/47359?v=4\",\"description\":\"\",\"name\":\"The Apache Software Foundation\",\"company\":null,\"blog\":\"http://www.apache.org/\",\"location\":null,\"email\":\"\",\"has_organization_projects\":true,\"has_repository_projects\":true,\"public_repos\":1476,\"public_gists\":0,\"followers\":0,\"following\":0,\"html_url\":\"https://github.com/apache\",\"created_at\":\"2009-01-17T20:14:40Z\",\"updated_at\":\"2017-12-13T04:09:41Z\",\"type\":\"Organization\"}"} |
+| {"code":200,"headers":{"Transfer-Encoding":"chunked","Status":"200 OK","Server":"GitHub.com"...},"content":"{\"login\":\"apache\",\"id\":47359...}"} |
 
 This one using UDTF 
 ```sql
 select t_http_get("apache", printf("https://api.github.com/orgs/%s", "apache"), 10000);
 ```
 gives output like:
+
 | code  |                      headers                       |                      content                       |   ctx   |
 | ----- | -------------------------------------------------- | -------------------------------------------------- | ------- |
-| 200   | {"Transfer-Encoding":"chunked","Status":"200 OK","Server":"GitHub.com","Access-Control-Allow-Origin":"*","X-Content-Type-Options":"nosniff","X-RateLimit-Reset":"1515651158","Last-Modified":"Wed, 13 Dec 2017 04:09:41 GMT","Date":"Thu, 11 Jan 2018 06:04:21 GMT","X-Runtime-rack":"0.046639","X-Frame-Options":"deny","Access-Control-Expose-Headers":"ETag, Link, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval","Strict-Transport-Security":"max-age=31536000; includeSubdomains; preload","X-RateLimit-Remaining":"51","Cache-Control":"public, max-age=60, s-maxage=60","ETag":"W/\"6d227b45e362cfa7a1758e504bf534a0\"","X-GitHub-Media-Type":"github.v3; format=json","Content-Security-Policy":"default-src 'none'","Vary":"Accept-Encoding","X-RateLimit-Limit":"60","X-XSS-Protection":"1; mode=block","Content-Type":"application/json; charset=utf-8","X-GitHub-Request-Id":"BBE2:A967:103ACA:146432:5A56FE65"} | {"login":"apache","id":47359,"url":"https://api.github.com/orgs/apache","repos_url":"https://api.github.com/orgs/apache/repos","events_url":"https://api.github.com/orgs/apache/events","hooks_url":"https://api.github.com/orgs/apache/hooks","issues_url":"https://api.github.com/orgs/apache/issues","members_url":"https://api.github.com/orgs/apache/members{/member}","public_members_url":"https://api.github.com/orgs/apache/public_members{/member}","avatar_url":"https://avatars0.githubusercontent.com/u/47359?v=4","description":"","name":"The Apache Software Foundation","company":null,"blog":"http://www.apache.org/","location":null,"email":"","has_organization_projects":true,"has_repository_projects":true,"public_repos":1476,"public_gists":0,"followers":0,"following":0,"html_url":"https://github.com/apache","created_at":"2009-01-17T20:14:40Z","updated_at":"2017-12-13T04:09:41Z","type":"Organization"} | apache  |
+| 200   | {"Transfer-Encoding":"chunked","Status":"200 OK","Server":"GitHub.com","Access-Control-Allow-Origin":"*"...} | {"login":"apache","id":47359,...} | apache  |
 
 
 
@@ -101,15 +101,38 @@ gives output like:
 
 |type|name|parameters|return|
 | --- | --- | --- | --- |
-|udf|zk_read|_FUNC_(zkAddress, timeout, pathToReads...) recursively read data from zookeeper paths|struct of "p", "v", path and value|
-|udf|zk_write|_FUNC_(zkAddress, timeout, pathAndValues...) recursively write values paired with zookeeper paths|struct of "p", "v", path and old value|
-|udf|zk_delete|_FUNC_(zkAddress, timeout, pathToDeletes) recursively delete zookeeper paths|struct of "p", "v", path and old value|
-|udtf|t_zk_write|_FUNC_(zkAddress, timeout, pathAndValues...) recursively write values paired with zookeeper paths|struct of "p", "v", path and old value|
-|udtf|t_zk_delete|_FUNC_(zkAddress, timeout, pathToDeletes) recursively delete zookeeper paths|struct of "p", "v", path and old value|
+|udf|zk_read|zk_read(String zkAddress, int timeout, String...pathToReads...) recursively read data from zookeeper paths|struct of "p", "v", path and value|
+|udf|zk_write|zk_write(String zkAddress, int timeout, Map pathAndValues) recursively write values paired with zookeeper paths|struct of "p", "v", path and old value|
+|udf|zk_delete|zk_delete(String zkAddress, int timeout, String...pathToDeletes) recursively delete zookeeper paths|struct of "p", "v", path and old value|
+|udtf|t_zk_write|t_zk_write(String zkAddress, int timeout, String...pathAndValues) recursively write values paired with zookeeper paths|struct of "p", "v", path and old value|
+|udtf|t_zk_delete|t_zk_delete(Any context, String zkAddress, int timeout, Map<String, String> pathAndValues) recursively write values paired with zookeeper paths|struct of "p", "v", path and old value|
+
+For example, read from path /hbase/:
+```sql
+select explode(zk_read("some-server:2181,some-server:2181,some-server:2181",3000,"/hbase"));
+```
+got result like:
+
+| col |
+| --- |
+| {"p":"/hbase","v":""}                              |
+| {"p":"/hbase/table","v":""}                        |
+| {"p":"/hbase/table/test","v":"?\u0000\u0000\u0000\u0014master:16000\u0000/<?!??\u0000PBUF\b\u0000"} |
+| {"p":"/hbase/table/hbase:namespace","v":"?\u0000\u0000\u0000\u0014master:16000?\u001dA???T?PBUF\b\u0000"} |
+| {"p":"/hbase/table/hbase:meta","v":"?\u0000\u0000\u0000\u0014master:16000???\u001e?lP?PBUF\b\u0000"} |
+| ... |
+
+
 
 ### Kafka (/default producer configurations/default consumer configuration/list topics/pull/push)
 |type|name|parameters|return|
 | --- | --- | --- | --- |
-|udf|m_add|_FUNC_(map1, map2....) - Returns a combined map of N maps|a map|
+|udf|m_add|m_add(map1, map2....) - Returns a combined map of N maps|a map|
+|udf|kf_consumer_cfgs|kf_consumer_cfgs() - return the map containing default settings for kafka consumer|a map|
+|udf|kf_producer_cfgs|kf_producer_cfgs() - return the map containing default settings for kafka producer|a map|
+|udf|kf_topics|kf_topics() - read all topics from kafka by settings in map parameter (kf_consumer_cfgs)|an array of structs with properties of t(topic) and p(partition)|
+|udf|kf_pull|kf_pull(map, start_date_str, end_date_str, topics...) - poll records from kafka by time windows and topics, it returns an array of structs with properties of t(topic), ct(creation time), k(key) and v(value)|an array of structs that has "t" for topic, "ct" for creation time, "k" for key, "v" for value|
+|udtf|t_kf_push|t_kf_push(Any context, Map<String, String> map, String topic, String key, String value) - pushWithTransaction records to kafka topics, it returns an array records of structs with properties of t(topic), ct(creation time), k(key) and v(value)|an array of structs that has "t" for topic, "ct" for creation time, "k" for key, "v" for value|
+
 
 I am working on functions to pull from/push to kafka.
