@@ -105,6 +105,46 @@ gives output like:
 |udtf|t_zk_write|t_zk_write(String zkAddress, int timeout, String...pathAndValues) recursively write values paired with zookeeper paths|struct of "p", "v", path and old value|
 |udtf|t_zk_delete|t_zk_delete(Any context, String zkAddress, int timeout, Map<String, String> pathAndValues) recursively write values paired with zookeeper paths|struct of "p", "v", path and old value|
 
+For example, read from path /hbase/:
+```sql
+select explode(zk_read("some-server:2181,some-server:2181,some-server:2181",3000,"/hbase"));
+```
+got result like:
+| col |
+| --- |
+| {"p":"/hbase","v":""}                              |
+| {"p":"/hbase/table","v":""}                        |
+| {"p":"/hbase/table/test","v":"?\u0000\u0000\u0000\u0014master:16000\u0000/<?!??\u0000PBUF\b\u0000"} |
+| {"p":"/hbase/table/hbase:namespace","v":"?\u0000\u0000\u0000\u0014master:16000?\u001dA???T?PBUF\b\u0000"} |
+| {"p":"/hbase/table/hbase:meta","v":"?\u0000\u0000\u0000\u0014master:16000???\u001e?lP?PBUF\b\u0000"} |
+| {"p":"/hbase/hbaseid","v":"?\u0000\u0000\u0000\u0014master:16000S\\?.?7\u0000;PBUF\n$118bca6f-6f49-4713-85f7-337ff4ad6182"} |
+| {"p":"/hbase/namespace","v":""}                    |
+| {"p":"/hbase/namespace/hbase","v":"?\u0000\u0000\u0000\u0014master:16000?\u000f??J],g\n\u0005hbase"} |
+| {"p":"/hbase/namespace/default","v":"?\u0000\u0000\u0000\u0014master:160009????P4?\n\u0007default"} |
+| {"p":"/hbase/draining","v":""}                     |
+| {"p":"/hbase/recovering-regions","v":""}           |
+| {"p":"/hbase/running","v":"?\u0000\u0000\u0000\u0014master:16000????BE?7PBUF\n\u001cTue Aug 01 12:22:46 GMT 2017"} |
+| {"p":"/hbase/online-snapshot","v":""}              |
+| {"p":"/hbase/online-snapshot/reached","v":""}      |
+| {"p":"/hbase/online-snapshot/acquired","v":""}     |
+| {"p":"/hbase/online-snapshot/abort","v":""}        |
+| {"p":"/hbase/region-in-transition","v":""}         |
+| {"p":"/hbase/flush-table-proc","v":""}             |
+| {"p":"/hbase/flush-table-proc/reached","v":""}     |
+| {"p":"/hbase/flush-table-proc/acquired","v":""}    |
+| {"p":"/hbase/flush-table-proc/abort","v":""}       |
+| {"p":"/hbase/table-lock","v":""}                   |
+| {"p":"/hbase/table-lock/test","v":""}              |
+| {"p":"/hbase/table-lock/hbase:namespace","v":""}   |
+| {"p":"/hbase/backup-masters","v":""}               |
+| {"p":"/hbase/splitWAL","v":""}                     |
+| {"p":"/hbase/rs","v":""}                           |
+| {"p":"/hbase/replication","v":""}                  |
+| {"p":"/hbase/replication/rs","v":""}               |
+| {"p":"/hbase/replication/peers","v":""}            |
+
+
+
 ### Kafka (/default producer configurations/default consumer configuration/list topics/pull/push)
 |type|name|parameters|return|
 | --- | --- | --- | --- |
