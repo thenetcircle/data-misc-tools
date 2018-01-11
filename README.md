@@ -84,6 +84,7 @@ This one using UDTF
 select t_http_get("apache", printf("https://api.github.com/orgs/%s", "apache"), 10000);
 ```
 gives output like:
+
 | code  |                      headers                       |                      content                       |   ctx   |
 | ----- | -------------------------------------------------- | -------------------------------------------------- | ------- |
 | 200   | {"Transfer-Encoding":"chunked","Status":"200 OK","Server":"GitHub.com","Access-Control-Allow-Origin":"*"...} | {"login":"apache","id":47359,...} | apache  |
