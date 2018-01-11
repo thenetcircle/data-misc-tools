@@ -110,6 +110,7 @@ For example, read from path /hbase/:
 select explode(zk_read("some-server:2181,some-server:2181,some-server:2181",3000,"/hbase"));
 ```
 got result like:
+
 | col |
 | --- |
 | {"p":"/hbase","v":""}                              |
