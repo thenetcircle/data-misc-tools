@@ -15,6 +15,7 @@ import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectIn
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static com.thenetcircle.service.data.hive.udf.UDFHelper.envProbe;
 import static com.thenetcircle.service.data.hive.udf.UDFHelper.stackTraces;
@@ -41,6 +42,11 @@ public class GenericUDFTests extends GenericUDF {
     @Override
     public ObjectInspector initialize(ObjectInspector[] args) throws UDFArgumentException {
         System.out.printf("\n%s initialized\n%s\n\n", this.toString(), stackTraces(2));
+
+        Stream.of(args)
+            .map(arg -> ToStringBuilder.reflectionToString(arg, ToStringStyle.MULTI_LINE_STYLE))
+            .forEach(System.out::println);
+
         return ObjectInspectorFactory.getStandardListObjectInspector(PrimitiveObjectInspectorFactory.javaStringObjectInspector);
     }
 
