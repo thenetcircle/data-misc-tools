@@ -4,9 +4,9 @@ import com.thenetcircle.service.data.hive.udf.UDFHelper;
 import org.apache.hadoop.hive.ql.exec.Description;
 import org.apache.hadoop.hive.ql.exec.UDFArgumentException;
 import org.apache.hadoop.hive.ql.metadata.HiveException;
+import org.apache.hadoop.hive.ql.udf.generic.GenericUDFUtils;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisCommands;
 
 import java.lang.reflect.Method;
 
@@ -24,7 +24,6 @@ public class UDTFJedisSet5 extends JedisUDTF {
         }
 
         UDFHelper.PrimitiveMethodBridge mb = UDFHelper.getMethodBridge(Jedis.class, setMd, argOIs);
-
         return mb;
     }
 

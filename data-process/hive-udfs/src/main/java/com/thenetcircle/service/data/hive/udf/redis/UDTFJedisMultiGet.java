@@ -22,9 +22,12 @@ public class UDTFJedisMultiGet extends JedisUDTF {
         Method mgetMd = JedisHelper.getMethod("mget", String[].class);
         UDFHelper.PrimitiveMethodBridge mb = UDFHelper.getMethodBridge(Jedis.class, mgetMd, argOIs);
 
+
+
         return mb;
     }
 
+    //TODO org.apache.hadoop.hive.ql.udf.generic.GenericUDFUtils.ConversionHelper
     @Override
     public Object[] evaluate(Object[] _args, int start) throws HiveException {
 

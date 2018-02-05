@@ -16,7 +16,11 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 
 import java.io.IOException;
-import java.util.*;
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static com.thenetcircle.service.data.hive.udf.UDFHelper.deferedObj2Map;
@@ -82,12 +86,15 @@ public class UDFKafkaPull extends GenericUDF {
 
         ObjectInspectorConverters.Converter dateConverter = ObjectInspectorConverters.getConverter(
             startDateStrInsp,
-            PrimitiveObjectInspectorFactory.writableDateObjectInspector);
+            PrimitiveObjectInspectorFactory.javaTimestampObjectInspector);
 
-        Date start = UDFHelper.getDate("kf_pull", args[1], PrimitiveObjectInspector.PrimitiveCategory.DATE, dateConverter);
-        Date end = UDFHelper.getDate("kf_pull", args[2], PrimitiveObjectInspector.PrimitiveCategory.DATE, dateConverter);
+        Timestamp start = (Timestamp) dateConverter.convert(args[1].get());// UDFHelper.getDate("kf_pull", args[1], PrimitiveObjectInspector.PrimitiveCategory.TIMESTAMP, dateConverter);
+        dateConverter = ObjectInspectorConverters.getConverter(
+            endDateStrInsp,
+            PrimitiveObjectInspectorFactory.javaTimestampObjectInspector);
+        Timestamp end = (Timestamp) dateConverter.convert(args[2].get()); //UDFHelper.getDate("kf_pull", args[2], PrimitiveObjectInspector.PrimitiveCategory.TIMESTAMP, dateConverter);
 
-        if (start == null || end == null || start.after(end)) {
+        if (start == null || end == null || start.equals(end) || start.after(end)) {
             System.out.printf("start: %s and end: %s are erroneous\n", start, end);
             return new Object[0];
         }
@@ -103,7 +110,6 @@ public class UDFKafkaPull extends GenericUDF {
             .filter(StringUtils::isNotBlank)
             .map(String::trim)
             .toArray(String[]::new);
-
 
         Map<?, ?> cfgs = deferedObj2Map(args[0], settingInsp, retInsp);
         if (!cfgs.containsKey(BOOTSTRAP_SERVERS_CONFIG)

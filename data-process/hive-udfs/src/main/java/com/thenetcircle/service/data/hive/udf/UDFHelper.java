@@ -12,6 +12,7 @@ import org.apache.hadoop.hive.ql.exec.UDFArgumentLengthException;
 import org.apache.hadoop.hive.ql.exec.UDFArgumentTypeException;
 import org.apache.hadoop.hive.ql.metadata.HiveException;
 import org.apache.hadoop.hive.ql.udf.generic.GenericUDF;
+import org.apache.hadoop.hive.ql.util.JavaDataModel;
 import org.apache.hadoop.hive.serde2.io.ByteWritable;
 import org.apache.hadoop.hive.serde2.io.*;
 import org.apache.hadoop.hive.serde2.io.DoubleWritable;
@@ -19,17 +20,19 @@ import org.apache.hadoop.hive.serde2.io.ShortWritable;
 import org.apache.hadoop.hive.serde2.objectinspector.*;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.AbstractPrimitiveJavaObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorUtils;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.VoidObjectInspector;
+import org.apache.hadoop.hive.serde2.typeinfo.ListTypeInfo;
+import org.apache.hadoop.hive.serde2.typeinfo.StructTypeInfo;
+import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
+import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 import org.apache.hadoop.io.*;
 import org.apache.hadoop.net.NetUtils;
 import org.apache.hive.common.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.util.*;
@@ -38,12 +41,40 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
+import static org.apache.hadoop.hive.ql.exec.GroupByOperator.*;
 import static org.apache.hadoop.hive.serde2.objectinspector.ObjectInspectorConverters.Converter;
 import static org.apache.hadoop.hive.serde2.objectinspector.ObjectInspectorConverters.getConverter;
 import static org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory.getPrimitiveJavaObjectInspector;
+import static org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory.getPrimitiveWritableObjectInspector;
 import static org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorUtils.*;
+import static org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory.getMapTypeInfo;
+import static org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory.getPrimitiveTypeInfoFromJavaPrimitive;
+import static org.apache.hadoop.hive.serde2.typeinfo.TypeInfoUtils.getTypeInfoFromObjectInspector;
 
 public class UDFHelper {
+    public static Set<Class> NUMERIC_CLZZ = new HashSet<>(Arrays.asList(
+        Boolean.class,
+        Byte.class,
+        Short.class,
+        Integer.class,
+        Long.class,
+        Float.class,
+        Double.class
+    ));
+
+    public static int getSize(Object obj) {
+        Class c = obj.getClass();
+
+        if (c.isPrimitive() || NUMERIC_CLZZ.contains(c)) {
+            return JavaDataModel.JAVA64_OBJECT;
+        }
+
+        if (Timestamp.class.isAssignableFrom(c)) {
+            return javaObjectOverHead + javaSizePrimitiveType;
+        }
+
+        return javaSizeUnknownType;
+    }
 
     public static PrimitiveTypeEntry getTypeFor(Class<?> retType)
         throws UDFArgumentException {
@@ -351,10 +382,9 @@ public class UDFHelper {
     public static PrimitiveMethodBridge getMethodBridge(Class clz, Method md, ObjectInspector[] argOIs) throws UDFArgumentException {
         if (md == null)
             throw new UDFArgumentException(format("class: %s or methodName: %s is null", clz, md));
-
         try {
-            Parameter[] params = md.getParameters();
 
+            Parameter[] params = md.getParameters();
             Parameter lastParam = params[params.length - 1];
             if (!lastParam.isVarArgs()) {
                 if (argOIs.length < params.length) {
@@ -368,6 +398,9 @@ public class UDFHelper {
 
             mb.clz = clz;
             mb.method = md;
+
+//            List<TypeInfo> parameterTypeInfos = TypeInfoUtils.getParameterTypeInfos(md, params.length);
+//            TypeInfoUtils.getStandardJavaObjectInspectorFromTypeInfo()
 
             for (int i = 0, j = params.length; i < j; i++) {
                 Parameter param = params[i];
@@ -500,5 +533,135 @@ public class UDFHelper {
         return null;
     }
 
+    public final static ListTypeInfo getListTypeInfo(TypeInfo elTypeInfo) {
+        ListTypeInfo lti = new ListTypeInfo();
+        lti.setListElementTypeInfo(elTypeInfo);
+        return lti;
+    }
 
+    public final static StructTypeInfo getStructTypeInfo(List<String> allStructFieldNames,
+                                                         List<TypeInfo> allStructFieldTypeInfos) {
+        StructTypeInfo sti = new StructTypeInfo();
+        sti.setAllStructFieldNames(new ArrayList<String>(allStructFieldNames));
+        sti.setAllStructFieldTypeInfos(new ArrayList<TypeInfo>(allStructFieldTypeInfos));
+        return sti;
+    }
+
+    public static TypeInfo typeToTypeInfo(Type t) {
+        if (t == Object.class) return TypeInfoFactory.unknownTypeInfo;
+
+        if (t instanceof ParameterizedType) {
+            ParameterizedType pt = (ParameterizedType) t;
+            Type[] actualTypeArguments = pt.getActualTypeArguments();
+            if (List.class == (Class) pt.getRawType() || ArrayList.class == (Class) pt.getRawType()) {
+                return getListTypeInfo(typeToTypeInfo(actualTypeArguments[0]));
+            }
+
+            if (Map.class == (Class) pt.getRawType() || HashMap.class == (Class) pt.getRawType()) {
+                return getMapTypeInfo(typeToTypeInfo(actualTypeArguments[0]),
+                    typeToTypeInfo(actualTypeArguments[1]));
+            }
+
+            t = pt.getRawType();
+        }
+
+        if (!(t instanceof Class)) {
+            throw new RuntimeException("Hive does not understand type " + t);
+        }
+        Class c = (Class) t;
+        if (c.isPrimitive()) {
+            return getPrimitiveTypeInfoFromJavaPrimitive(c);
+        }
+        if (c.isArray()) {
+            return getListTypeInfo(typeToTypeInfo(c.getComponentType()));
+        }
+        if (Date.class.isAssignableFrom(c)) {
+            return TypeInfoFactory.dateTypeInfo;
+        }
+        if (PrimitiveObjectInspectorUtils.isPrimitiveJavaType(c)) {
+            return getTypeInfoFromObjectInspector(
+                getPrimitiveJavaObjectInspector(
+                    getTypeEntryFromPrimitiveJavaType(c).primitiveCategory));
+        }
+        if (PrimitiveObjectInspectorUtils.isPrimitiveJavaClass(c)) {
+            return getTypeInfoFromObjectInspector(
+                getPrimitiveJavaObjectInspector(
+                    getTypeEntryFromPrimitiveJavaClass(c).primitiveCategory));
+        }
+        if (PrimitiveObjectInspectorUtils.isPrimitiveWritableClass(c)) {
+            return getTypeInfoFromObjectInspector(
+                getPrimitiveWritableObjectInspector(
+                    getTypeEntryFromPrimitiveWritableClass(c).primitiveCategory));
+        }
+
+        Field[] fields = ObjectInspectorUtils.getDeclaredNonStaticFields(c);
+
+        List<String> fieldNameList = Arrays.stream(fields)
+            .map(Field::getName)
+            .collect(Collectors.toList());
+
+        List<TypeInfo> tiList = Arrays.stream(fields)
+            .map(Field::getType)
+            .map(UDFHelper::typeToTypeInfo)
+            .collect(Collectors.toList());
+
+        return getStructTypeInfo(fieldNameList, tiList);
+    }
+
+    public static TypeInfo getParamentTypeInfo(Parameter param) {
+        if (param == null) return null;
+        return typeToTypeInfo(param.getType());
+    }
+
+    public final static String what(Object obj) {
+        if (obj == null) return "[null]";
+        return format("%s:\t%s", obj.getClass().getSimpleName(), obj);
+    }
+
+//    public static LazyBinaryObject toLazyBin(ObjectInspector lazyOI) {
+//        if (lazyOI == null) {
+//            return createLazyBinaryPrimitiveClass(writableVoidObjectInspector);
+//        }
+//
+//        switch (lazyOI.getCategory()) {
+//            case PRIMITIVE:
+//                PrimitiveObjectInspector poi = (PrimitiveObjectInspector) lazyOI;
+//                return createLazyBinaryPrimitiveClass(
+//                    getPrimitiveWritableObjectInspector(poi.getTypeInfo()));
+//
+//            case LIST:
+//
+//        }
+//    }
+
+    public static class _StandardListOI extends StandardListObjectInspector {
+        public _StandardListOI() {
+            super();
+        }
+
+        public _StandardListOI(ObjectInspector elOI) {
+            super(elOI);
+        }
+    }
+
+    public static class _StandardMapOI extends StandardMapObjectInspector {
+        public _StandardMapOI() {
+            super();
+        }
+
+        public _StandardMapOI(ObjectInspector keyOI, ObjectInspector valueOI) {
+            super(keyOI, valueOI);
+        }
+    }
+
+    public static class _StandardStructOI extends StandardStructObjectInspector {
+        public _StandardStructOI() {
+            super();
+        }
+
+        public _StandardStructOI(List<String> structFieldNames,
+                                 List<ObjectInspector> structFieldObjectInspectors) {
+            super(structFieldNames, structFieldObjectInspectors);
+        }
+    }
 }

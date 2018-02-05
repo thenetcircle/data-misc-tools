@@ -93,8 +93,8 @@ public class KafkaHelper {
         DEFAULT_CONSUMER_CONFIGS.put(ConsumerConfig.CLIENT_ID_CONFIG, "hive-udf");
         DEFAULT_CONSUMER_CONFIGS.put(ENABLE_AUTO_COMMIT_CONFIG, "false");
         DEFAULT_CONSUMER_CONFIGS.put(AUTO_COMMIT_INTERVAL_MS_CONFIG, "1000");
-        DEFAULT_CONSUMER_CONFIGS.put(ConsumerConfig.REQUEST_TIMEOUT_MS_CONFIG, "1001");
-        DEFAULT_CONSUMER_CONFIGS.put(SESSION_TIMEOUT_MS_CONFIG, "1000");
+        DEFAULT_CONSUMER_CONFIGS.put(ConsumerConfig.REQUEST_TIMEOUT_MS_CONFIG, "11001");
+        DEFAULT_CONSUMER_CONFIGS.put(SESSION_TIMEOUT_MS_CONFIG, "11000");
         DEFAULT_CONSUMER_CONFIGS.put(HEARTBEAT_INTERVAL_MS_CONFIG, "800");
         DEFAULT_CONSUMER_CONFIGS.put(KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         DEFAULT_CONSUMER_CONFIGS.put(VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
@@ -177,7 +177,7 @@ public class KafkaHelper {
                                                             String... topics) {
         Map<String, List<PartitionInfo>> topicAndParts = kc.listTopics();
 
-        topicAndParts.entrySet().forEach(System.out::println);
+//        topicAndParts.entrySet().forEach(System.out::println);
 
         Collection<String> validTopics = CollectionUtils.intersection(Arrays.asList(topics), topicAndParts.keySet());
 
@@ -218,7 +218,7 @@ public class KafkaHelper {
                     .map(OffsetAndTimestamp::offset)
                     .orElse(topicPartAndLatests.get(tp));
 
-                System.out.printf("tp:%s\t from: %s\t to: %s\n", tp, fromInclusive, toInclusive);
+                System.out.printf("tp:%s\t offset from: %s\t at time: %s to: %s at time: %s\n", tp, fromInclusive, start, toInclusive, end);
 
                 return new Object[]{tp, fromInclusive, toInclusive};
             }).toArray(Object[][]::new);
