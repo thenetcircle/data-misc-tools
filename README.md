@@ -25,9 +25,21 @@ Interpreter context, so it can:
 It will run at one minute interval periodically and detect the change of scala source,
 change of code will trigger scala interpreter to compile and update the ongoing scala function.
 
-Basically a timer to run spark jobs without compiling, stop, restart spark process.
+Basically a timer to run spark jobs without compiling, stopping, deploying, restarting spark process.
 
-To do, will add support for java/python/sql source file
+Add support to run hive sql script files stored on HDFS
+
+I reuse the Hive Beeline instance and replace the input/output stream
+so that the spark runner can mimic beeline to run hive sql script, combined with my hive UDF,
+Addition to Hive ability to load data from hdfs files, 
+It is also capable of:
+1. loading data from http
+2. sending data to http
+3. pulling data from kafka according to time window (require support of [kafka_2.11-0.11.0.0](https://kafka.apache.org/0100/javadoc/index.html?org/apache/kafka/connect/data/Timestamp.html))
+4. push data to kafka
+5. read/set key/values to redis
+
+To do, will add support for java/python source file
 
 
 ## 2. Hive functions
@@ -136,3 +148,52 @@ got result like:
 
 
 I am working on functions to pull from/push to kafka.
+
+## Example of ETL jobs using Hive SQL with extend UDF
+```sql
+use mns_tests;
+
+CREATE TEMPORARY MACRO TP() "yyyy-MM-dd'T'HH:mm";
+CREATE TEMPORARY MACRO default_now(time_str string) if(time_str IS NOT NULL, unix_timestamp(time_str, TP()), unix_timestamp());
+create temporary macro su_strip(s string, t string) reflect('org.apache.commons.lang3.StringUtils', 'strip', s, t);
+
+-- using t_http_get to load data from spark-post web service
+-- the result is in form of json
+drop table if exists temp_raw_events;
+CREATE temporary TABLE temp_raw_events                        
+as select t_http_get(
+                 named_struct(
+                     't', unix_timestamp(),
+                     's', from_unixtime(default_now(query_end), TP()),
+                     'e', from_unixtime(default_now(query_end)+3600,TP())
+                 ),
+                 printf('https://api.sparkpost.com/api/v1/message-events?from=%s&to=%s',
+                     from_unixtime(default_now(query_end), TP()),
+                     from_unixtime(default_now(query_end)+3600,TP())),
+                   5000,
+                   map('Authorization','spark-post-key',
+                         'User-Agent','java-sparkpost/0.19 (eccac9f)',
+                         'Content-Type','application/json')) from raw_events;
+
+insert overwrite table raw_events select ctx.t as load_time, ctx.s as query_begin, ctx.e as query_end, content from temp_raw_events;
+insert into table history_raw_events select ctx.t as load_time, ctx.s as query_begin, ctx.e as query_end, content from temp_raw_events;
+
+drop table if exists temp_sp_events;
+CREATE temporary TABLE temp_sp_events (
+ev string
+) stored as orc;
+
+--ETL extract, transform, load
+insert overwrite table temp_sp_events select evs.ev  from temp_raw_events raw
+lateral view explode(
+    split(
+        su_strip(get_json_object(raw.content, '$.results'), '[]'),
+        '(?<=\\}),(?=\\{)')) evs as ev;
+
+--More specific ETL job....
+insert into table sp_events (ev, time_stamp, type) 
+select ev,
+cast(unix_timestamp(substr(get_json_object(ev, '$.timestamp'), 0, 19), "yyyy-MM-dd'T'HH:mm:ss") * 1000 as timestamp)  as time_stamp,
+get_json_object(ev, '$.type') as type
+from temp_sp_events;
+```
