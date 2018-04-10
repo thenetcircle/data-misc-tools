@@ -9,7 +9,7 @@ for data process, I created and am developing some functions for Hive and spark.
 
 
 ### Requirement
-1. Spark 2.2
+1. Spark 2.2 (in order to avoid version confliction between Spark and Hive, I recompiled spark without hive support)
 2. Hive 2.3
 3. Hadoop 3.0.0
 
@@ -40,6 +40,27 @@ It is also capable of:
 5. read/set key/values to redis
 
 To do, will add support for java/python source file
+
+### 1.1 Simple Scheduler 
+Added simple annotation to manager task execution, such as task description, interval to run.
+```scala
+import org.apache.log4j.{LogManager, Logger}
+import org.apache.spark.sql.SparkSession
+import annotation.ProcDescription
+import hive._
+/**
+  * Created by fan on 2018/04/10.
+  */
+@ProcDescription(description="One ring to rule them all", interval="PT1M")
+class ProcessorLoader extends ((SparkSession, Any) => Any) {
+    val log: Logger = LogManager.getLogger("ProcessorLoader.scala")
+    override def apply(spark: SparkSession, param: Any): Any = {
+         log.info("testing....")
+         new HiveBeeLine(interval = "PT60M")(spark, "/user/tncdata/scripts/hive/test.sql")
+    }
+}
+new ProcessorLoader
+```
 
 
 ## 2. Hive functions

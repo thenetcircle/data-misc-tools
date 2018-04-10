@@ -36,7 +36,7 @@ object Configs {
         return re
     }
 
-    val PROPS_CFGS: Map[String, String] = loadProperties(PROPS_CFGS.getOrElse("configs", "./configs/configs.properties"))
+    val PROPS_CFGS: Map[String, String] = loadProperties(System.getProperty("configs", "./configs/configs.properties"))
 
     val DATETIME_FORMAT: String = "yyyy-MM-dd_hh-mm-ss"
     val ZOOKEEPER_SERVERS: String = PROPS_CFGS.getOrElse("zk.servers", "some zookeeper url")
