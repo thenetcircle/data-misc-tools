@@ -70,11 +70,11 @@ public class UDTFTests extends GenericUDTF {
 
     @Override
     public void process(Object[] args) throws HiveException {
-        System.out.printf("\n%s process\n%s\n\n", this, stackTraces(20));
+        System.out.printf("\n%s records\n%s\n\n", this, stackTraces(20));
 
         String row = StringUtils.join(Stream.of(args).map(UDTFTests::testObj).toArray(String[]::new), "\t");
 
-        System.out.printf("\n\t%s process %d args\n%s\n\n", this, args.length, row);
+        System.out.printf("\n\t%s records %d args\n%s\n\n", this, args.length, row);
 
         forward(envProbe() + row);
     }

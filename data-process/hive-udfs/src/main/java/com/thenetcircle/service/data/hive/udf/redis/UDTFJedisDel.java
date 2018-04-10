@@ -7,6 +7,7 @@ import org.apache.hadoop.hive.ql.exec.UDFArgumentException;
 import org.apache.hadoop.hive.ql.metadata.HiveException;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspectorConverters;
+import static org.apache.hadoop.hive.serde2.objectinspector.ObjectInspectorConverters.*;
 import redis.clients.jedis.Jedis;
 
 import java.lang.reflect.Method;
@@ -24,9 +25,8 @@ public class UDTFJedisDel extends JedisUDTF {
 
     @Override
     public Object[] evaluate(Object[] _args, int start) throws HiveException {
-
-        Pair<ObjectInspector, ObjectInspectorConverters.Converter> inspAndConverter = mb.objInspAndConverters.get(0);
-        ObjectInspectorConverters.Converter converter = inspAndConverter.getRight();
+        Pair<ObjectInspector, Converter> inspAndConverter = mb.objInspAndConverters.get(0);
+        Converter converter = inspAndConverter.getRight();
         String[] keys = Stream.of(_args)
             .skip(start)
             .map(arg -> converter.convert(arg))

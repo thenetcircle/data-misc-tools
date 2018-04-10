@@ -9,8 +9,10 @@ import org.apache.hadoop.hive.ql.exec.UDFArgumentTypeException;
 import org.apache.hadoop.hive.ql.metadata.HiveException;
 import org.apache.hadoop.hive.ql.udf.UDFType;
 import org.apache.hadoop.hive.ql.udf.generic.GenericUDF;
-import org.apache.hadoop.hive.serde2.objectinspector.*;
-import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory;
+import org.apache.hadoop.hive.serde2.objectinspector.MapObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.PrimitiveObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.StandardMapObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.StringObjectInspector;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -26,6 +28,12 @@ import java.util.stream.Stream;
 import static com.thenetcircle.service.data.hive.udf.UDFHelper.deferedObj2Map;
 import static com.thenetcircle.service.data.hive.udf.kafka.KafkaHelper.mapToProperties;
 import static java.lang.String.format;
+import static org.apache.hadoop.hive.serde2.objectinspector.ObjectInspectorConverters.Converter;
+import static org.apache.hadoop.hive.serde2.objectinspector.ObjectInspectorConverters.getConverter;
+import static org.apache.hadoop.hive.serde2.objectinspector.ObjectInspectorUtils.ObjectInspectorCopyOption;
+import static org.apache.hadoop.hive.serde2.objectinspector.ObjectInspectorUtils.getStandardObjectInspector;
+import static org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory.javaStringObjectInspector;
+import static org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory.javaTimestampObjectInspector;
 import static org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorUtils.PrimitiveGrouping.STRING_GROUP;
 import static org.apache.kafka.clients.CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG;
 
@@ -57,7 +65,7 @@ public class UDFKafkaPull extends GenericUDF {
                 throw new UDFArgumentTypeException(0, "Setting parameter must be map<String, String>:\n\t" + moi);
             }
             settingInsp = moi;
-            retInsp = (StandardMapObjectInspector) ObjectInspectorUtils.getStandardObjectInspector(settingInsp, ObjectInspectorUtils.ObjectInspectorCopyOption.JAVA);
+            retInsp = (StandardMapObjectInspector) getStandardObjectInspector(settingInsp, ObjectInspectorCopyOption.JAVA);
         }
 
         checkArgGroups(args, 1, inputTypes, STRING_GROUP);
@@ -84,14 +92,14 @@ public class UDFKafkaPull extends GenericUDF {
             return new Object[0];
         }
 
-        ObjectInspectorConverters.Converter dateConverter = ObjectInspectorConverters.getConverter(
+        Converter dateConverter = getConverter(
             startDateStrInsp,
-            PrimitiveObjectInspectorFactory.javaTimestampObjectInspector);
+            javaTimestampObjectInspector);
 
         Timestamp start = (Timestamp) dateConverter.convert(args[1].get());// UDFHelper.getDate("kf_pull", args[1], PrimitiveObjectInspector.PrimitiveCategory.TIMESTAMP, dateConverter);
-        dateConverter = ObjectInspectorConverters.getConverter(
+        dateConverter = getConverter(
             endDateStrInsp,
-            PrimitiveObjectInspectorFactory.javaTimestampObjectInspector);
+            javaTimestampObjectInspector);
         Timestamp end = (Timestamp) dateConverter.convert(args[2].get()); //UDFHelper.getDate("kf_pull", args[2], PrimitiveObjectInspector.PrimitiveCategory.TIMESTAMP, dateConverter);
 
         if (start == null || end == null || start.equals(end) || start.after(end)) {
@@ -99,7 +107,7 @@ public class UDFKafkaPull extends GenericUDF {
             return new Object[0];
         }
 
-        ObjectInspectorConverters.Converter topicConverter = ObjectInspectorConverters.getConverter(topicInsp, PrimitiveObjectInspectorFactory.javaStringObjectInspector);
+        Converter topicConverter = getConverter(topicInsp, javaStringObjectInspector);
 
         DeferredObject[] topicDeferredObjs = ArrayUtils.subarray(args, 3, args.length);
         String[] argTopics = Stream.of(topicDeferredObjs)

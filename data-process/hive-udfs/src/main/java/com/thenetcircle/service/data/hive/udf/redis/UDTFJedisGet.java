@@ -7,6 +7,7 @@ import org.apache.hadoop.hive.ql.exec.UDFArgumentException;
 import org.apache.hadoop.hive.ql.metadata.HiveException;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspectorConverters;
+import static org.apache.hadoop.hive.serde2.objectinspector.ObjectInspectorConverters.*;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCommands;
 
@@ -26,9 +27,9 @@ public class UDTFJedisGet extends JedisUDTF {
     @Override
     public Object[] evaluate(Object[] _args, int start) throws HiveException {
 
-        Pair<ObjectInspector, ObjectInspectorConverters.Converter> inspAndConverter = mb.objInspAndConverters.get(0);
-        ObjectInspectorConverters.Converter converter = inspAndConverter.getRight();
-        String key = (String) converter.convert(_args[0]);
+        Pair<ObjectInspector, Converter> inspAndConverter = mb.objInspAndConverters.get(0);
+        Converter converter = inspAndConverter.getRight();
+        String key = (String) converter.convert(_args[0 + start]);
 
         return new Object[]{jd.get(key)};
     }

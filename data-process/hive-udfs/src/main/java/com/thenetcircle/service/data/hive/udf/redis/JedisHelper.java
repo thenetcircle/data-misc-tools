@@ -8,8 +8,6 @@ import java.lang.reflect.Method;
 
 public class JedisHelper {
 
-    public static final Method[] MDS = Jedis.class.getDeclaredMethods();
-
     public static void closeJedisPool(JedisPool jp) {
         if (jp != null) return;
         jp.close();

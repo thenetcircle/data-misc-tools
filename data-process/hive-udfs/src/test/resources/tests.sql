@@ -66,3 +66,19 @@ drop function if exists jd_get;
 create function jd_get as 'com.thenetcircle.service.data.hive.udf.redis.UDTFJedisGet';
 drop function if exists jd_del;
 create function jd_del as 'com.thenetcircle.service.data.hive.udf.redis.UDTFJedisDel';
+drop function if exists jd_mget;
+create function jd_mget as 'com.thenetcircle.service.data.hive.udf.redis.UDTFJedisMultiGet';
+drop function if exists jd_mset;
+create function jd_mset as 'com.thenetcircle.service.data.hive.udf.redis.UDTFJedisMultiSet';
+
+!reconnect
+delete jar file:///usr/local/tncdata/tmp/data-hive-udfs-0.0.2.jar;
+add jar file:///usr/local/tncdata/tmp/data-hive-udfs-0.0.2.jar;
+drop function if exists max_with;
+create function max_with as 'com.thenetcircle.service.data.hive.udf.commons.UDAFCmpBase';
+select max_with(city_id, array(city_id, city)) from gc where region_id='331' group by region_id;
+
+select max_with(city_id, city) from gc where region_id='331' group by region_id;
+
+select region_id, max_with(city_id, struct(city_id, city)) from gc where region_id='323' group by region_id;
+

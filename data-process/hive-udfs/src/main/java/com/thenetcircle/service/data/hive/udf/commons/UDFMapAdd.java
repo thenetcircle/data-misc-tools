@@ -21,8 +21,8 @@ import static org.apache.hadoop.hive.serde2.objectinspector.ObjectInspectorUtils
 )
 @UDFType(deterministic = true, stateful = false, distinctLike = true)
 public class UDFMapAdd extends GenericUDF {
-    private MapObjectInspector mapInsp;
-    private StandardMapObjectInspector retInsp;
+    private transient MapObjectInspector mapInsp;
+    private transient StandardMapObjectInspector retInsp;
 
     @Override
     public ObjectInspector initialize(ObjectInspector[] args) throws UDFArgumentException {

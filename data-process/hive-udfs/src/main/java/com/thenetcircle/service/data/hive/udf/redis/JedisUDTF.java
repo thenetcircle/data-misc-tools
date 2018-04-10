@@ -3,7 +3,6 @@ package com.thenetcircle.service.data.hive.udf.redis;
 import com.thenetcircle.service.data.hive.udf.UDFHelper;
 import com.thenetcircle.service.data.hive.udf.commons.UDTFExt;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.hadoop.hive.ql.exec.UDFArgumentException;
 import org.apache.hadoop.hive.ql.exec.UDFArgumentTypeException;
@@ -12,7 +11,6 @@ import org.apache.hadoop.hive.serde2.objectinspector.ConstantObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspectorConverters;
 import org.apache.hadoop.hive.serde2.objectinspector.StructObjectInspector;
-import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.StringObjectInspector;
 import redis.clients.jedis.Jedis;
 
@@ -20,6 +18,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import static com.thenetcircle.service.data.hive.udf.UDFHelper.checkArgsSize;
+import static org.apache.hadoop.hive.serde2.objectinspector.ObjectInspectorConverters.getConverter;
+import static org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory.javaStringObjectInspector;
 
 public abstract class JedisUDTF extends UDTFExt {
     protected transient Jedis jd;
@@ -46,7 +46,7 @@ public abstract class JedisUDTF extends UDTFExt {
         }
 
         ConstantObjectInspector uriInsp = (ConstantObjectInspector) argOIs[0];
-        ObjectInspectorConverters.Converter converter = ObjectInspectorConverters.getConverter(uriInsp, PrimitiveObjectInspectorFactory.javaStringObjectInspector);
+        ObjectInspectorConverters.Converter converter = getConverter(uriInsp, javaStringObjectInspector);
         redisURIStr = (String) converter.convert(uriInsp.getWritableConstantValue());
 //TODO
 //        paramObjInsps = initParamInsps(ArrayUtils.subarray(argOIs, 1, argOIs.length));
@@ -71,13 +71,12 @@ public abstract class JedisUDTF extends UDTFExt {
     @Override
     public void process(Object[] args) throws HiveException {
         setupJedis();
-
         Object[] results = ArrayUtils.add(evaluate(args, 2), args[0]);
         System.out.printf("args: %s\nresult: %s\n\n", ToStringBuilder.reflectionToString(args), ToStringBuilder.reflectionToString(results));
         forward(results);
     }
 
-    private void setupJedis() throws HiveException {
+    protected void setupJedis() throws HiveException {
         if (jd == null || !jd.isConnected()) {
             jd = null;
             try {

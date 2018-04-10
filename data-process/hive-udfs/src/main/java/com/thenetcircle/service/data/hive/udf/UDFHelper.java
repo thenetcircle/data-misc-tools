@@ -283,8 +283,9 @@ public class UDFHelper {
     public static StructObjectInspector addContextToStructInsp(StructObjectInspector soip, ObjectInspector oip) {
         if (soip == null || oip == null) return null;
 
-        List<String> fieldNames = soip.getAllStructFieldRefs().stream().map(StructField::getFieldName).collect(Collectors.toList());
-        List<ObjectInspector> fieldInsp = soip.getAllStructFieldRefs().stream().map(StructField::getFieldObjectInspector).collect(Collectors.toList());
+        List<? extends StructField> fieldRefs = soip.getAllStructFieldRefs();
+        List<String> fieldNames = fieldRefs.stream().map(StructField::getFieldName).collect(Collectors.toList());
+        List<ObjectInspector> fieldInsp = fieldRefs.stream().map(StructField::getFieldObjectInspector).collect(Collectors.toList());
 
         fieldNames.add("ctx");
         fieldInsp.add(oip);
@@ -524,7 +525,7 @@ public class UDFHelper {
                 Class keyClz = (Class) keyType;
                 AbstractPrimitiveJavaObjectInspector keyObjInsp = getPrimitiveJavaObjectInspector(getTypeEntryFromPrimitiveJava(keyClz).primitiveCategory);
                 Class valClz = (Class) valType;
-                AbstractPrimitiveJavaObjectInspector valObjInsp = getPrimitiveJavaObjectInspector(getTypeEntryFromPrimitiveJava(keyClz).primitiveCategory);
+                AbstractPrimitiveJavaObjectInspector valObjInsp = getPrimitiveJavaObjectInspector(getTypeEntryFromPrimitiveJava(valClz).primitiveCategory);
 
                 return ObjectInspectorFactory.getStandardMapObjectInspector(keyObjInsp, valObjInsp);
             }

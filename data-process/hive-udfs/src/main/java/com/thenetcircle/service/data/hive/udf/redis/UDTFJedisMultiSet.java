@@ -6,12 +6,12 @@ import org.apache.hadoop.hive.ql.exec.Description;
 import org.apache.hadoop.hive.ql.exec.UDFArgumentException;
 import org.apache.hadoop.hive.ql.metadata.HiveException;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
-import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspectorConverters;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisCommands;
 
 import java.lang.reflect.Method;
 import java.util.stream.Stream;
+
+import static org.apache.hadoop.hive.serde2.objectinspector.ObjectInspectorConverters.Converter;
 
 @Description(name = "jd_mset", value = "jd_mset(Any Context, String redisUrl, String...keys) -> String[]")
 public class UDTFJedisMultiSet extends JedisUDTF {
@@ -26,8 +26,8 @@ public class UDTFJedisMultiSet extends JedisUDTF {
     @Override
     public Object[] evaluate(Object[] _args, int start) throws HiveException {
 
-        Pair<ObjectInspector, ObjectInspectorConverters.Converter> inspAndConverter = mb.objInspAndConverters.get(0);
-        ObjectInspectorConverters.Converter converter = inspAndConverter.getRight();
+        Pair<ObjectInspector, Converter> inspAndConverter = mb.objInspAndConverters.get(0);
+        Converter converter = inspAndConverter.getRight();
         String[] keys = Stream.of(_args)
             .skip(start)
             .map(arg -> converter.convert(arg))

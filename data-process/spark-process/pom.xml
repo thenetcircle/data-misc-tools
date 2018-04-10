@@ -18,11 +18,6 @@
 
     <dependencies>
 
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-collections4</artifactId>
-            <version>4.1</version>
-        </dependency>
         <!--<dependency>-->
         <!--<groupId>org.apache.kafka</groupId>-->
         <!--<artifactId>kafka-examples</artifactId>-->
@@ -49,16 +44,27 @@
             <artifactId>hive-jdbc</artifactId>
             <version>${hive.version}</version>
             <scope>provided</scope>
+            <classifier>standalone</classifier>
+            <!--<exclusions>-->
+            <!--<exclusion>-->
+            <!--<groupId>javax.jdo</groupId>-->
+            <!--<artifactId>jdo-api</artifactId>-->
+            <!--</exclusion>-->
+            <!--<exclusion>-->
+            <!--<groupId>org.datanucleus</groupId>-->
+            <!--<artifactId>javax.jdo</artifactId>-->
+            <!--</exclusion>-->
+            <!--</exclusions>-->
         </dependency>
         <dependency>
             <groupId>org.apache.hive</groupId>
-            <artifactId>spark-client</artifactId>
+            <artifactId>hive-jdbc-handler</artifactId>
             <version>${hive.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.hive</groupId>
-            <artifactId>hive-jdbc-handler</artifactId>
+            <artifactId>hive-beeline</artifactId>
             <version>${hive.version}</version>
             <scope>provided</scope>
         </dependency>
@@ -75,36 +81,17 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.apache.hive</groupId>
+            <artifactId>spark-client</artifactId>
+            <version>${hive.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.hbase</groupId>
             <artifactId>hbase-server</artifactId>
             <version>1.2.6</version>
             <scope>provided</scope>
         </dependency>
-        <!--<dependency>-->
-        <!--<groupId>org.apache.hive</groupId>-->
-        <!--<artifactId>hive-hbase-handler</artifactId>-->
-        <!--<version>${hive.version}</version>-->
-        <!--<scope>provided</scope>-->
-        <!--<exclusions>-->
-        <!--<exclusion>-->
-        <!--<groupId>org.apache.hbase</groupId>-->
-        <!--<artifactId>hbase-client</artifactId>-->
-        <!--</exclusion>-->
-        <!--</exclusions>-->
-        <!--</dependency>-->
-
-        <!--<dependency>-->
-        <!--<groupId>org.apache.spark</groupId>-->
-        <!--<artifactId>spark-streaming_2.11</artifactId>-->
-        <!--<version>${spark.version}</version>-->
-        <!--<exclusions>-->
-        <!--<exclusion>-->
-        <!--<groupId>org.apache.hadoop</groupId>-->
-        <!--<artifactId>hadoop-client</artifactId>-->
-        <!--</exclusion>-->
-        <!--</exclusions>-->
-        <!--<scope>provided</scope>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-streaming-kafka-0-10-assembly_2.11</artifactId>
@@ -128,28 +115,30 @@
             </exclusions>
             <scope>provided</scope>
         </dependency>
-
-        <dependency>
-            <groupId>org.apache.spark</groupId>
-            <artifactId>spark-hive_2.11</artifactId>
-            <version>2.2.0</version>
-            <scope>provided</scope>
-        </dependency>
-
         <dependency>
             <groupId>com.alibaba.otter</groupId>
             <artifactId>canal.client</artifactId>
             <version>1.0.24</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
             <version>1.2.28</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.8.2</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.43</version>
+            <scope>provided</scope>
         </dependency>
 
     </dependencies>
@@ -222,6 +211,25 @@
                 </executions>
                 <version>3.2.2</version>
             </plugin>
+
+            <plugin>
+                <groupId>org.datanucleus</groupId>
+                <artifactId>datanucleus-maven-plugin</artifactId>
+                <version>5.0.2</version>
+                <configuration>
+                    <log4jConfiguration>${basedir}/src/main/resources/log4j.properties</log4jConfiguration>
+                    <verbose>true</verbose>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>enhance</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
 
     </build>
