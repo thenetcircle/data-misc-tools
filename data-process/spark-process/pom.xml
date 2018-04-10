@@ -191,7 +191,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>InterpreterLoader</mainClass>
+                            <mainClass>process.InterpreterLoader</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -245,7 +245,7 @@
                         <configuration>
                             <archive>
                                 <manifest>
-                                    <mainClass>InterpreterLoader</mainClass>
+                                    <mainClass>process.InterpreterLoader</mainClass>
                                 </manifest>
                             </archive>
                         </configuration>
