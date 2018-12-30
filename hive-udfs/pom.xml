@@ -16,6 +16,7 @@
             <groupId>com.thenetcircle.services.data</groupId>
             <artifactId>commons</artifactId>
             <version>1.0.0</version>
+            <type>pom</type>
         </dependency>
 
         <dependency>
@@ -41,6 +42,30 @@
                     <target>${target.version}</target>
                 </configuration>
                 <version>3.7.0</version>
+            </plugin>
+
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.1.1</version>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteSnapshots>false</overWriteSnapshots>
+                            <overWriteIfNewer>true</overWriteIfNewer>
+                            <excludeScope>provided</excludeScope>
+                            <!--<excludeTransitive>true</excludeTransitive>-->
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
