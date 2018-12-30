@@ -31,8 +31,8 @@ class ExecutionRecord extends Serializable {
     }
 
     override def hashCode(): Int = {
-        val state = Seq(scriptSrc, startedAt)
-        state.map(_.hashCode()).foldLeft(0)((a, b) => 31 * a + b)
+        val state: Seq[Any] = Seq(scriptSrc, startedAt)
+        state.map((_: Any).hashCode()).foldLeft(0)((a: Int, b: Int) => 31 * a + b)
     }
 
     override def toString =
@@ -41,5 +41,5 @@ class ExecutionRecord extends Serializable {
            |finishedAt=${toTimeStr(finishedAt)},
            |result=$result,
            |status=$status,
-           |hashCode=$hashCode)""".stripMargin
+           |hashCode=$hashCode())""".stripMargin
 }

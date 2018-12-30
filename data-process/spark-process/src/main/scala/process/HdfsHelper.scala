@@ -28,7 +28,7 @@ object HdfsHelper {
         var fsis: FSDataInputStream = null
         try {
             val path: Path = new Path(pathStr)
-            if (!(_hdfs.isFile(path)))
+            if (!_hdfs.isFile(path))
                 return StringUtils.EMPTY
 
             fsis = _hdfs.open(path)
@@ -48,7 +48,7 @@ object HdfsHelper {
 
         try {
             val path: Path = new Path(pathStr)
-            fsos = if (!(_hdfs.isFile(path))) {
+            fsos = if (!_hdfs.isFile(path)) {
                 _hdfs.create(path)
             } else {
                 _hdfs.append(path)

@@ -10,14 +10,26 @@
     <properties>
         <target.version>1.8</target.version>
         <source.version>1.8</source.version>
-        <hadoop.version>2.5.1</hadoop.version>
+        <hadoop.version>3.0.0</hadoop.version>
         <kafka.version>0.11.0.0</kafka.version>
-        <hive.version>2.3.0</hive.version>
-        <spark.version>2.2.0</spark.version>
+        <hive.version>3.0.0</hive.version>
+        <spark.version>2.4.0</spark.version>
+        <scala.verson>2.11.8</scala.verson>
     </properties>
 
     <dependencies>
-
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+            <version>${scala.verson}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-compiler</artifactId>
+            <version>${scala.verson}</version>
+            <scope>provided</scope>
+        </dependency>
         <!--<dependency>-->
         <!--<groupId>org.apache.kafka</groupId>-->
         <!--<artifactId>kafka-examples</artifactId>-->
@@ -45,16 +57,12 @@
             <version>${hive.version}</version>
             <scope>provided</scope>
             <classifier>standalone</classifier>
-            <!--<exclusions>-->
-            <!--<exclusion>-->
-            <!--<groupId>javax.jdo</groupId>-->
-            <!--<artifactId>jdo-api</artifactId>-->
-            <!--</exclusion>-->
-            <!--<exclusion>-->
-            <!--<groupId>org.datanucleus</groupId>-->
-            <!--<artifactId>javax.jdo</artifactId>-->
-            <!--</exclusion>-->
-            <!--</exclusions>-->
+            <exclusions>
+                <exclusion>
+                    <groupId>org.glassfish</groupId>
+                    <artifactId>javax.el</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.hive</groupId>

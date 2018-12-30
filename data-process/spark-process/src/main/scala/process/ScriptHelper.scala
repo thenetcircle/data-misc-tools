@@ -45,15 +45,13 @@ object ScriptHelper {
 
             val interval: Duration = MiscHelper.parseDuration(procDesc.interval())
             val last: ExecutionRecord = RecordDao.getLastExecution(scriptPath)
-            Option(last)
-                .map(rec => interval.compareTo(Duration.ofMillis(System.currentTimeMillis() - rec.startedAt)) < 0)
-                .getOrElse(true)
+            Option(last).forall(rec => interval.compareTo(Duration.ofMillis(System.currentTimeMillis() - rec.startedAt)) < 0)
         }
     }
 
-    case class ScriptTask(val fileStatus: FileStatus,
-                          val task: TaskFunction[_],
-                          val scriptSrc: String,
+    case class ScriptTask(fileStatus: FileStatus,
+                          task: TaskFunction[_],
+                          scriptSrc: String,
                           var scriptException: ScriptException) {
         def isCompiled: Boolean = scriptException == null
     }

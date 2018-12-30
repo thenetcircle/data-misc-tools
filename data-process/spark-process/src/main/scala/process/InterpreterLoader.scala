@@ -33,9 +33,9 @@ object InterpreterLoader {
     def getUserJars(conf: SparkConf): Seq[String] = {
         val sparkJars: Option[String] = conf.getOption("spark.jars")
         val yarnJars: Option[String] = conf.getOption("spark.yarn.dist.jars")
-        val sparkJarList: List[String] = sparkJars.map(_.split(",")).getOrElse(Array.empty).toList
-        val yarnJarList: List[String] = yarnJars.map(_.split(",")).getOrElse(Array.empty).toList
-        return (sparkJarList ::: yarnJarList).filter(_.nonEmpty).toSet.toList
+        val sparkJarList: List[String] = sparkJars.map((_: String).split(",")).getOrElse(Array.empty).toList
+        val yarnJarList: List[String] = yarnJars.map((_: String).split(",")).getOrElse(Array.empty).toList
+        return (sparkJarList ::: yarnJarList).filter((_: String).nonEmpty).distinct
     }
 
     var sc: SparkContext = _
@@ -65,7 +65,7 @@ object InterpreterLoader {
 
     def prepareSettings(args: Array[String], conf: SparkConf): Settings = {
         if (outputDir == null || !outputDir.exists()) {
-            val errMsg: String = s"failed to create output dir: ${outputDir}"
+            val errMsg: String = s"failed to create output dir: $outputDir"
             log.error(errMsg)
             throw new IllegalStateException(errMsg)
         }
@@ -83,7 +83,7 @@ object InterpreterLoader {
         settings.usejavacp.value = true
         settings.embeddedDefaults(SparkSubmit.getClass.getClassLoader)
         settings.classpath.value = sys.props("java.class.path")
-        val (result: Boolean, argList: List[String]) = settings.processArguments(intpArgs, true)
+        val (result: Boolean, argList: List[String]) = settings.processArguments(intpArgs, processAll = true)
         if (!result) {
             val errMsg: String = s"failed to records args:\n\t${intpArgs.mkString("\n\t")}"
             log.error(errMsg)
@@ -130,10 +130,10 @@ object InterpreterLoader {
                 Thread.sleep(Math.max(ONE_MINUTE_IN_MS - (System.currentTimeMillis() - preStartTime), 0))
             }
         } catch {
-            case e: Throwable => log.error(s"failed to eval script at: ${args}", e)
+            case e: Throwable => log.error(s"failed to eval script at: $args", e)
         } finally {
-            Option(spark).foreach(_.stop())
-            Option(intp).foreach(_.close())
+            Option(spark).foreach((_: SparkSession).stop())
+            Option(intp).foreach((_: IMain).close())
         }
     }
 
