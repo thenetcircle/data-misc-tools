@@ -16,9 +16,10 @@
     </properties>
 
     <modules>
-        <module>spark-processor</module>
+        <!--<module>spark-processor</module>-->
         <module>hive-udfs</module>
-        <module>postgresql-udfs</module>
+        <module>hive-jdbc-storage-handler</module>
+        <!--<module>postgresql-udfs</module>-->
         <module>commons</module>
     </modules>
 
