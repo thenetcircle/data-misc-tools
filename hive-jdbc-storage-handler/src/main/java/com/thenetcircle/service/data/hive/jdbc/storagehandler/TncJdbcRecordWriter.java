@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hive.ql.exec.FileSinkOperator.RecordWriter;
+import org.apache.hadoop.hive.ql.session.SessionState;
 import org.apache.hadoop.io.MapWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
@@ -45,7 +46,7 @@ public class TncJdbcRecordWriter implements RecordWriter {
         try {
             init();
         } catch (IOException e) {
-            e.printStackTrace();
+            e.printStackTrace(SessionState.get().err);
         }
     }
 
@@ -55,6 +56,7 @@ public class TncJdbcRecordWriter implements RecordWriter {
                 dbcpDataSource = BasicDataSourceFactory.createDataSource(getConnPoolProps(conf));
             } catch (Exception e) {
                 log.error("failed to create datasource", e);
+                e.printStackTrace(SessionState.get().err);
             }
         }
 
@@ -80,6 +82,7 @@ public class TncJdbcRecordWriter implements RecordWriter {
                 throw new IOException(e);
             } catch (Exception e) {
                 log.error("failed to create connection", e);
+                e.printStackTrace(SessionState.get().err);
             }
         }
 
@@ -105,7 +108,8 @@ public class TncJdbcRecordWriter implements RecordWriter {
                 sendBatch();
             }
         } catch (SQLException e) {
-            log.error(format("failed to set \n\t %s"));
+            log.error(format("failed to set \n\t %s", w));
+            e.printStackTrace(SessionState.get().err);
         }
     }
 
@@ -124,6 +128,7 @@ public class TncJdbcRecordWriter implements RecordWriter {
             ps = conn.prepareStatement(sql);
         } catch (SQLException e) {
             log.error("failed to prepare statement with sql:\n\t" + sql, e);
+            e.printStackTrace(SessionState.get().err);
             throw new IOException(e);
         }
     }
@@ -138,6 +143,7 @@ public class TncJdbcRecordWriter implements RecordWriter {
                 conn.rollback();
         } catch (SQLException e) {
             log.error("failed to close connection", e);
+            e.printStackTrace(SessionState.get().err);
             throw new IOException(e);
         } finally {
             counter = 0;

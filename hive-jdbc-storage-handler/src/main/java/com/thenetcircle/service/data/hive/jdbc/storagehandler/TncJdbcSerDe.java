@@ -41,7 +41,6 @@ public class TncJdbcSerDe extends AbstractSerDe {
     private int numColumns;
     private String[] hiveColumnTypeArray;
     private List<Object> row;
-//    private DbRecWritable cachedWritable;
 
     @Override
     public void initialize(@Nullable Configuration conf, Properties tbl) throws SerDeException {
@@ -74,11 +73,8 @@ public class TncJdbcSerDe extends AbstractSerDe {
             hiveColumnTypeArray = StringUtils.split(tbl.getProperty(serdeConstants.LIST_COLUMN_TYPES), ':');
             List<ObjectInspector> fieldInspectors = new ArrayList<>(numColumns);
 
-//            this.cachedWritable = new DbRecWritable(hiveTypesToSqlTypes(hiveColumnTypeArray));
-
             for (int i = 0; i < numColumns; i++) {
                 PrimitiveTypeInfo ti = getPrimitiveTypeInfo(hiveColumnTypeArray[i]);
-//                ObjectInspector oi = getPrimitiveWritableObjectInspector(ti);
                 ObjectInspector oi = getPrimitiveJavaObjectInspector(ti);
                 fieldInspectors.add(oi);
             }
@@ -114,7 +110,6 @@ public class TncJdbcSerDe extends AbstractSerDe {
 
 // when it is direct insert using liberals, it is raw values in an array
         // when it is inserted with selected values, it is an array of writables
-//        cachedWritable.clear();
         MapWritable mw = new MapWritable();
         for (int i = 0; i < numColumns; i++) {
             StructField sf = fieldList.get(i);
