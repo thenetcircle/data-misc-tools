@@ -1,0 +1,33 @@
+SQLActions[] = {
+    "BEGIN INSTALL
+        create schema dp;
+        begin PostgreSQL set search_path to dp, public end PostgreSQL;
+
+        create function dp.url_encode(varchar)
+            RETURNS varchar
+            as 'com.thenetcircle.service.data.access.http.HttpHelper.urlEncode'
+            language java;
+
+        create type dp.http_req
+            as (method varchar, url varchar, headers json, content varchar, timeout integer);
+
+        create type dp.http_resp
+            as (status int, headers json, result varchar);
+
+        create type dp.http_ctx
+            as (req dp.http_req, resp dp.http_resp);
+
+        create type dp.test_re
+            as (counter int, info varchar);
+
+		CREATE FUNCTION dp.test(anyelement)
+			RETURNS SETOF dp.test_re
+			AS 'com.thenetcircle.service.data.postgresql.udf.TestUDFs.test'
+			IMMUTABLE LANGUAGE java;
+
+    END INSTALL",
+
+    "BEGIN REMOVE
+        DROP SCHEMA dp CASCADE;
+    END REMOVE"
+}

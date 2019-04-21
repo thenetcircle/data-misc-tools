@@ -1,0 +1,3 @@
+
+Name: deployment/data-process.ddr
+SQLJDeploymentDescriptor: TRUE

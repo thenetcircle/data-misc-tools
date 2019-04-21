@@ -1,0 +1,61 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.postgresql</groupId>
+		<artifactId>pljava.app</artifactId>
+		<version>1.5.1-BETA2</version>
+	</parent>
+	<artifactId>pljava-api</artifactId>
+	<name>PL/Java API</name>
+	<description>The API for Java stored procedures in PostgreSQL using PL/Java</description>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifestSections>
+							<manifestSection>
+								<name>org/postgresql/pljava/</name>
+								<manifestEntries>
+									<Implementation-Title>
+										${project.name}
+									</Implementation-Title>
+									<Implementation-Version>
+										${project.version}
+									</Implementation-Version>
+									<Implementation-Vendor>
+										${project.organization.name}
+									</Implementation-Vendor>
+								</manifestEntries>
+							</manifestSection>
+						</manifestSections>
+					</archive>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-service-config</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${basedir}/target/classes</outputDirectory>
+							<resources>
+								<resource>
+									<directory>src/main/late-added-resources</directory>
+									<filtering>false</filtering>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>

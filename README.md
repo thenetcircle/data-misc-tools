@@ -218,3 +218,4 @@ cast(unix_timestamp(substr(get_json_object(ev, '$.timestamp'), 0, 19), "yyyy-MM-
 get_json_object(ev, '$.type') as type
 from temp_sp_events;
 ```
+

@@ -3,9 +3,9 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.thenetcircle.services.data</groupId>
     <artifactId>data-misc-tools</artifactId>
+    <version>0.0.1</version>
     <packaging>pom</packaging>
 
-    <version>1.0.0</version>
     <properties>
         <target.version>1.8</target.version>
         <source.version>1.8</source.version>
@@ -19,7 +19,7 @@
         <!--<module>spark-processor</module>-->
         <module>hive-udfs</module>
         <module>hive-jdbc-storage-handler</module>
-        <!--<module>postgresql-udfs</module>-->
+        <module>postgresql-udfs</module>
         <module>commons</module>
     </modules>
 
