@@ -1,9 +1,10 @@
 SQLActions[] = {
     "BEGIN INSTALL
-        create schema dp;
+        create schema if not exists dp ;
+
         begin PostgreSQL set search_path to dp, public end PostgreSQL;
 
-        create function dp.url_encode(varchar)
+        create or replace function dp.url_encode(varchar)
             RETURNS varchar
             as 'com.thenetcircle.service.data.access.http.HttpHelper.urlEncode'
             language java;
@@ -20,10 +21,17 @@ SQLActions[] = {
         create type dp.test_re
             as (counter int, info varchar);
 
-		CREATE FUNCTION dp.test(anyelement)
+		create or replace function dp.test(anyelement)
 			RETURNS SETOF dp.test_re
 			AS 'com.thenetcircle.service.data.postgresql.udf.TestUDFs.test'
 			IMMUTABLE LANGUAGE java;
+
+		create or replace function dp.init()
+		    RETURNS void
+		    as 'com.thenetcircle.service.data.postgresql.udf.Setup.initiate'
+		    language java;
+
+        select dp.init();
 
     END INSTALL",
 
