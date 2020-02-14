@@ -37,7 +37,7 @@ public class TncJdbcRecordWriter implements RecordWriter {
     protected int totalCount = 0;
     protected String tableName;
     protected JdbcColumnInfo[] columnInfos;
-    protected Map<String, Text> nameToText = new HashMap();
+    protected Map<String, Text> nameToText = new HashMap<>();
     protected int fetchSize = 1000;
 
 
@@ -108,8 +108,8 @@ public class TncJdbcRecordWriter implements RecordWriter {
                 sendBatch();
             }
         } catch (SQLException e) {
-            log.error(format("failed to set \n\t %s", w));
-            e.printStackTrace(SessionState.get().err);
+            log.error(format("failed to set \n\t %s ", w));
+            throw new IOException(e);
         }
     }
 
